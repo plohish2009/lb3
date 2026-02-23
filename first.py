@@ -6,7 +6,6 @@ import time
 OUTPUT_DIR = 'output'
 INPUT_DIR = "img"
 def produceri(image_files, task_queue, num_consumers):
-    """Простой производитель"""
     print(f"Producer: начинаю добавлять {len(image_files)} изображений")
     for img_file in image_files:
         if os.path.exists(img_file):
@@ -43,7 +42,7 @@ def consumeri(consumer_id, task_queue, results, results_lock):
                 # Инвертируем изображение
                 inverted = ImageOps.invert(img)
 
-                #создаём папку, если её нет.  # Имя папки для результатов
+                #создаём папку, если её нет.
                 os.makedirs(OUTPUT_DIR , exist_ok=True)
 
 
@@ -69,9 +68,7 @@ def consumeri(consumer_id, task_queue, results, results_lock):
             print(f"Consumer {consumer_id}: ошибка при обработке {task}: {e}")
         
         finally:
-            processed_count += 1
-            #task_queue.task_done()
-    
+            processed_count += 1  
     return processed_count
 
 
@@ -87,6 +84,7 @@ def main():
     
     print(f"Найдено изображений для обработки: {[os.path.basename(f) for f in existing_images]}")
     NUM_CONSUMERS = (len(existing_images) // 4) + 1
+    print(f'Будет создано {NUM_CONSUMERS} consumerov')
     # Создаем очередь и список результатов с блокировкой
     task_queue = Queue()
     results = []
@@ -99,7 +97,7 @@ def main():
     consumers = []
     for i in range(NUM_CONSUMERS):
         consumer = Thread(target=consumeri, 
-                         args=(i, task_queue, results, results_lock))
+                         args=(i + 1, task_queue, results, results_lock))
         consumers.append(consumer)
     
     # Запускаем все потоки
