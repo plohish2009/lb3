@@ -55,7 +55,6 @@ def consumeri(consumer_id, task_queue, results, results_lock):
 
                 
                 inverted.save(output_path)
-
                 
                 with results_lock:
                     results.append(f"OK: {task} -> {output_path} (consumer {consumer_id})")
@@ -98,9 +97,7 @@ def main():
         consumers.append(consumer)
     
   
-    print("\n" + "="*50)
-    print("ЗАПУСК ПОТОКОВ")
-    print("="*50)
+    print("\n" +"ЗАПУСК ПОТОКОВ")
     
     start_time = time.time()
 
@@ -117,9 +114,7 @@ def main():
     
     elapsed_time = time.time() - start_time
     
-    print("\n" + "="*50)
-    print("РЕЗУЛЬТАТЫ ОБРАБОТКИ")
-    print("="*50)
+    print("\n" + "РЕЗУЛЬТАТЫ ОБРАБОТКИ")
     print(f"Время выполнения: {elapsed_time:.2f} секунд")
     print(f"Всего результатов: {len(results)}")
     
