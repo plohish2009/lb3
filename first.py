@@ -14,7 +14,7 @@ def produceri(image_files, task_queue, num_consumers):
         else:
             print(f"Producer: файл {img_file} не найден, пропускаю")
     
-    # Сигналы завершения
+    
     for _ in range(num_consumers):
         task_queue.put(None)
     print("Producer: все задачи добавлены, отправлены сигналы завершения")
@@ -25,7 +25,7 @@ def consumeri(consumer_id, task_queue, results, results_lock):
     
     while True:
         task = task_queue.get()     
-        # Проверка на сигнал завершения
+        
         if task is None:
             print(f"Consumer {consumer_id}: получен сигнал завершения, обработано {processed_count} задач")
             task_queue.task_done()
@@ -33,30 +33,30 @@ def consumeri(consumer_id, task_queue, results, results_lock):
         print(f"Consumer {consumer_id}: начал обработку {os.path.basename(task)}")
         
         try:
-            # Инверсия цветов
+            
             with Image.open(task) as img:
-                # Конвертируем в RGB если нужно
+                
                 if img.mode != 'RGB':
                     img = img.convert('RGB')
                 
-                # Инвертируем изображение
+            
                 inverted = ImageOps.invert(img)
 
-                #создаём папку, если её нет.
+                
                 os.makedirs(OUTPUT_DIR , exist_ok=True)
 
 
-                # Создаем выходное имя
+                
                 base_name = os.path.splitext(os.path.basename(task))[0]
                 file_name = f"inverted_{base_name}_{consumer_id}.jpg"
 
-                # Склеиваем с путем к целевой папке
+                
                 output_path = os.path.join("output", file_name) 
 
-                # Сохраняем результат по новому пути
+                
                 inverted.save(output_path)
 
-                # В логи пишем новый путь
+                
                 with results_lock:
                     results.append(f"OK: {task} -> {output_path} (consumer {consumer_id})")
                 
@@ -85,40 +85,33 @@ def main():
     print(f"Найдено изображений для обработки: {[os.path.basename(f) for f in existing_images]}")
     NUM_CONSUMERS = (len(existing_images) // 4) + 1
     print(f'Будет создано {NUM_CONSUMERS} consumerov')
-    # Создаем очередь и список результатов с блокировкой
     task_queue = Queue()
     results = []
     results_lock = Lock()
-    # Создаем производителя
     producer = Thread(target=produceri, 
                       args=(existing_images, task_queue, NUM_CONSUMERS))
     
-    # Создаем потребителей
     consumers = []
     for i in range(NUM_CONSUMERS):
         consumer = Thread(target=consumeri, 
                          args=(i + 1, task_queue, results, results_lock))
         consumers.append(consumer)
     
-    # Запускаем все потоки
+  
     print("\n" + "="*50)
     print("ЗАПУСК ПОТОКОВ")
     print("="*50)
     
     start_time = time.time()
-    
-    # Сначала запускаем потребителей
+
     for c in consumers:
         c.start()
-    
-    # Затем производителя
+
     producer.start()
-    
-    # Ждем завершения производителя
+
     producer.join()
     print("\nProducer завершил работу")
     
-    # Ждем завершения всех потребителей
     for c in consumers:
         c.join()
     
@@ -130,11 +123,9 @@ def main():
     print(f"Время выполнения: {elapsed_time:.2f} секунд")
     print(f"Всего результатов: {len(results)}")
     
-    # Выводим результаты
     for result in results:
-        print(f"  {result}")
+        print(f"{result}")
     
-    # Проверяем созданные файлы
     print("\nСозданные файлы:")
     for file in os.listdir(OUTPUT_DIR):
         if file.startswith('inverted_'):
