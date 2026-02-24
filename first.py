@@ -51,7 +51,7 @@ def consumeri(consumer_id, task_queue, results, results_lock):
                 file_name = f"inverted_{base_name}_{consumer_id}.jpg"
 
                 
-                output_path = os.path.join("output", file_name) 
+                output_path = os.path.join(OUTPUT_DIR, file_name) 
 
                 
                 inverted.save(output_path)
